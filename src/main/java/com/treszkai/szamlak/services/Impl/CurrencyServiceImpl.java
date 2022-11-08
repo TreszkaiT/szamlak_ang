@@ -8,6 +8,7 @@ import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -39,4 +40,12 @@ public class CurrencyServiceImpl implements CurrencyService {
                 .map(currency -> modelMapper.map(currency, CurrencyDTO.class))
                 .collect(Collectors.toList());
     }
+
+    @Override
+    public Optional<CurrencyDTO> findById(Long id) {
+        Optional<Currency> optionalMovie = currencyRepository.findById(id);           // Optional<Movie> :  a Move Entity-t becsomagolja egy Optional generikus metódusba. A nullkezeléssel kapcsolatos dolgokat meg tudunk oldani (if(null)-al így már nem kell fogalalkozni)... keresékeknél használható, hoy megtaláltunk-e valamit vagy sem
+        return optionalMovie.map(movie -> modelMapper.map(movie, CurrencyDTO.class));
+    }
+
+
 }
