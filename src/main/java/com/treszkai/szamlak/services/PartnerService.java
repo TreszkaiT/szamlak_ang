@@ -10,4 +10,7 @@ public interface PartnerService {
     List<PartnerDTO> findAll();
 
     Optional<PartnerDTO> findById(Long id);
+
+    // film mentése. A létrehozott filmet szertnénk visszaadni az EndPoint felé -> MovieDTO visszatérési értéke lesz az elején
+    PartnerDTO create(PartnerDTO partnerDTO);
 }

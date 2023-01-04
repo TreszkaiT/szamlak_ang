@@ -13,4 +13,9 @@ public interface CurrencyService {
 
     Optional<CurrencyDTO> findById(Long id);
 
+    // film mentése. A létrehozott filmet szertnénk visszaadni az EndPoint felé -> MovieDTO visszatérési értéke lesz az elején
+    CurrencyDTO create(CurrencyDTO currencyDTO);
+
+    CurrencyDTO update(CurrencyDTO currencyDTO);
+
 }

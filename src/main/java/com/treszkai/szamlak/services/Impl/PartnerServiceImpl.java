@@ -69,4 +69,14 @@ public class PartnerServiceImpl implements PartnerService {
         Optional<Partner> optionalPartner = partnerReposiroty.findById(id);
         return optionalPartner.map(partner -> modelMapper.map(partner, PartnerDTO.class));
     }
+
+    @Override
+    public PartnerDTO create(PartnerDTO partnerDTO) {
+        Partner partnerToSave = modelMapper.map(partnerDTO, Partner.class);
+        partnerToSave.setId(null);
+        Partner partner = partnerReposiroty.save(partnerToSave);
+        return modelMapper.map(partner, PartnerDTO.class);
+    }
+
+
 }

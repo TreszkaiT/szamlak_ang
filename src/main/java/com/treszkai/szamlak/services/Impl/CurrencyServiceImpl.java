@@ -2,6 +2,7 @@ package com.treszkai.szamlak.services.Impl;
 
 import com.treszkai.szamlak.data.entity.Currency;
 import com.treszkai.szamlak.data.pojo.CurrencyDTO;
+import com.treszkai.szamlak.exception.CurrencyNotFoundException;
 import com.treszkai.szamlak.repository.CurrencyRepository;
 import com.treszkai.szamlak.services.CurrencyService;
 import org.modelmapper.ModelMapper;
@@ -43,9 +44,31 @@ public class CurrencyServiceImpl implements CurrencyService {
 
     @Override
     public Optional<CurrencyDTO> findById(Long id) {
-        Optional<Currency> optionalMovie = currencyRepository.findById(id);           // Optional<Movie> :  a Move Entity-t becsomagolja egy Optional generikus metódusba. A nullkezeléssel kapcsolatos dolgokat meg tudunk oldani (if(null)-al így már nem kell fogalalkozni)... keresékeknél használható, hoy megtaláltunk-e valamit vagy sem
-        return optionalMovie.map(movie -> modelMapper.map(movie, CurrencyDTO.class));
+        Optional<Currency> optionalCurrency = currencyRepository.findById(id);           // Optional<Currency> :  a Move Entity-t becsomagolja egy Optional generikus metódusba. A nullkezeléssel kapcsolatos dolgokat meg tudunk oldani (if(null)-al így már nem kell fogalalkozni)... keresékeknél használható, hoy megtaláltunk-e valamit vagy sem
+        return optionalCurrency.map(currency -> modelMapper.map(currency, CurrencyDTO.class));
     }
 
+    @Override
+    public CurrencyDTO create(CurrencyDTO currencyDTO) {
+        Currency currencyToSave = modelMapper.map(currencyDTO, Currency.class);
+        currencyToSave.setId(null);
+        Currency currency = currencyRepository.save(currencyToSave);
+        return modelMapper.map(currency, CurrencyDTO.class);
+    }
+
+    @Override
+    public CurrencyDTO update(CurrencyDTO currencyDTO) {
+        Long id = currencyDTO.getId();                                             // létezik-e már ilyen id, mert ha nem, akkor új sort szúrna be, és ezt nem szeretnénk
+        Optional<Currency> optionalCurrency = currencyRepository.findById(id);           // currencyRepository-val megpróbálom megkerestetni az id-t
+
+        if (optionalCurrency.isEmpty()){
+            //throw new RuntimeException();                                       // ezt az Exceptiont nem kötelező elkapnunk, ezért jó  ->>így ezen a ponton megszakad a metódus futása... ez elkezd felfelé gyűrűzni, és valahol a Spring csinál belőle egy általános hibaüzenetet
+            throw new CurrencyNotFoundException("Currency not found with id="+id);
+        }
+
+        Currency currencyToUpdate = modelMapper.map(currencyDTO, Currency.class);           // CurrencyDTO -> Currency
+        Currency saveCurrency = currencyRepository.save(currencyToUpdate);                  // elmentem a Respository segítségével
+        return modelMapper.map(saveCurrency, currencyDTO.getClass());                 // visszaadjuk CurrencyDTO-ként
+    }
 
 }
