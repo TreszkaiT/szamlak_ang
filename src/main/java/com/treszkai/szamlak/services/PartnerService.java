@@ -13,4 +13,9 @@ public interface PartnerService {
 
     // film mentése. A létrehozott filmet szertnénk visszaadni az EndPoint felé -> MovieDTO visszatérési értéke lesz az elején
     PartnerDTO create(PartnerDTO partnerDTO);
+
+    // delete
+    void delete(Long id);
+
+    PartnerDTO update(PartnerDTO partnerDTO);
 }

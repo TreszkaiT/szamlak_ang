@@ -2,6 +2,7 @@ package com.treszkai.szamlak.services.Impl;
 
 import com.treszkai.szamlak.data.entity.Partner;
 import com.treszkai.szamlak.data.pojo.PartnerDTO;
+import com.treszkai.szamlak.exception.PartnerNotFoundException;
 import com.treszkai.szamlak.repository.PartnerReposiroty;
 import com.treszkai.szamlak.services.PartnerService;
 import org.modelmapper.ModelMapper;
@@ -78,5 +79,37 @@ public class PartnerServiceImpl implements PartnerService {
         return modelMapper.map(partner, PartnerDTO.class);
     }
 
+    @Override
+    public PartnerDTO update(PartnerDTO partnerDTO) {
+        Long id = partnerDTO.getId();                                             // létezik-e már ilyen id, mert ha nem, akkor új sort szúrna be, és ezt nem szeretnénk
+        Optional<Partner> optionalPartner = partnerReposiroty.findById(id);           // currencyRepository-val megpróbálom megkerestetni az id-t
 
+        if (optionalPartner.isEmpty()){
+            //throw new RuntimeException();                                       // ezt az Exceptiont nem kötelező elkapnunk, ezért jó  ->>így ezen a ponton megszakad a metódus futása... ez elkezd felfelé gyűrűzni, és valahol a Spring csinál belőle egy általános hibaüzenetet
+            throw new PartnerNotFoundException("Partner not found with id="+id);
+        }
+
+        Partner partnerToUpdate = modelMapper.map(partnerDTO, Partner.class);           // PartnerDTO -> Partner
+        Partner savePartner = partnerReposiroty.save(partnerToUpdate);                  // elmentem a Respository segítségével
+        return modelMapper.map(savePartner, partnerDTO.getClass());                 // visszaadjuk PartnerDTO-ként
+    }
+
+    @Override
+    public void delete(Long id) {
+        Optional<Partner> optionalPartner = partnerReposiroty.findById(id);           // előbb megkeresem, hogy van-e ilyen film
+
+        if (optionalPartner.isPresent()){                                         // ha ez létezik ilyen movie
+            Partner partnerDelete = optionalPartner.get();                          // optionalPartner.get(); :: kicsomagolom a get()-el
+            partnerReposiroty.delete(partnerDelete);                              // Entity-t átadva törli
+        } else {
+            //throw new RuntimeException();                                     // ezen általános Except. helyett felveszek egy sajátot, az exception csomagba
+            throw new PartnerNotFoundException("Partner not found with id="+id);    // de itt így még csak a terminálban írja ki ezt a hibát, így csinálunk egy ControllerAdvice-t, ami elkapja a Controllerből kirepülő Exceptiont
+        }
+    }
+
+    // tehát mégegyszer:
+    // a Service lehív az adatbázishoz
+    // a movieRepository által megkaptuk az összes filmet, ami benne van
+    // utána a Steam-el a listát átalakítom movieDTO típusúvá, és ezt fogom visszaadni
+    // így megszületett a findAll() metódus implementációja
 }

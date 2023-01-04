@@ -71,4 +71,22 @@ public class CurrencyServiceImpl implements CurrencyService {
         return modelMapper.map(saveCurrency, currencyDTO.getClass());                 // visszaadjuk CurrencyDTO-ként
     }
 
+    @Override
+    public void delete(Long id) {
+        Optional<Currency> optionalCurrency = currencyRepository.findById(id);           // előbb megkeresem, hogy van-e ilyen film
+
+        if (optionalCurrency.isPresent()){                                         // ha ez létezik ilyen movie
+            Currency currencyDelete = optionalCurrency.get();                          // optionalCurrency.get(); :: kicsomagolom a get()-el
+            currencyRepository.delete(currencyDelete);                              // Entity-t átadva törli
+        } else {
+            //throw new RuntimeException();                                     // ezen általános Except. helyett felveszek egy sajátot, az exception csomagba
+            throw new CurrencyNotFoundException("Currency not found with id="+id);    // de itt így még csak a terminálban írja ki ezt a hibát, így csinálunk egy ControllerAdvice-t, ami elkapja a Controllerből kirepülő Exceptiont
+        }
+    }
+
+    // tehát mégegyszer:
+    // a Service lehív az adatbázishoz
+    // a movieRepository által megkaptuk az összes filmet, ami benne van
+    // utána a Steam-el a listát átalakítom movieDTO típusúvá, és ezt fogom visszaadni
+    // így megszületett a findAll() metódus implementációja
 }

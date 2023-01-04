@@ -77,6 +77,13 @@ public class CurrencyController {
         //return movieService.create(currencyDTO);                                                 // itt meg meghívom az Implementáció create metódusát
     }
 
+    // id alapján törlés
+    @RequestMapping(path = "/{id}", method = RequestMethod.DELETE)
+    public ResponseEntity<Void> delete(@PathVariable Long id){                                  // <Void>  : üres response Entity-t ad vissza, így ezen tudjuk állítgatni a HTTP status kódot
+        currencyService.delete(id);
+        return ResponseEntity.noContent().build();                                              // 204-es HTTP status code
+    }
+
     // frissítés id alapján
     @RequestMapping(path = "/{id}", method = RequestMethod.POST, produces = "application/json")
     public ResponseEntity<CurrencyDTO> update(@RequestBody @Valid CurrencyDTO currencyDTO, BindingResult bindingResult){                     // @RequestBody CurrencyDTO movieDTO:  a Request Body-ban várja az infót
